@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>528b3b41-011b-4001-8595-b9035553dde5</UserSecretsId>
+    <UserSecretsId>2e400737-591c-497f-a366-36c56bc50b42</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
   </PropertyGroup>
@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TemperatureCaptor.Infrastructure\TemperatureCaptor.Infrastructure.csproj" />
+    <Folder Include="Controllers\" />
   </ItemGroup>
+
 
 </Project>
