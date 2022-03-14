@@ -1,7 +1,6 @@
 ﻿using Application.UseCases;
 using Domain.Entity;
 using Domain.Repository;
-using Domain.Services;
 using Domain.Strategy;
 using Infrastructure;
 using UnitTest.Domain;
@@ -13,7 +12,6 @@ namespace UnitTest.Application.UseCases.GetSensorState
     internal sealed class GetSensorStateUseCaseBuilder
     {
         private readonly IStateSensorStrategyContext _stateSensorStrategyContext;
-        private readonly ITemperatureConverter _temperatureConverter;
         private ITemperatureRepository _temperatureRepository;
         private readonly GetSensorStatePresenter _presenter;
         private readonly SqlLiteContext _sqliteContext;
@@ -29,7 +27,6 @@ namespace UnitTest.Application.UseCases.GetSensorState
 
             _sqliteContext = SqlLiteContextExtensions.GetInMemoryContext();
             _temperatureRepository = new TemperatureRepository(_sqliteContext);
-            _temperatureConverter = new TemperatureConverter();
             _presenter = new GetSensorStatePresenter();
         }
 
@@ -40,7 +37,6 @@ namespace UnitTest.Application.UseCases.GetSensorState
         {
             return new GetSensorStateUseCase(_stateSensorStrategyContext,
                 _temperatureRepository,
-                _temperatureConverter,
                 _presenter);
         }
 
