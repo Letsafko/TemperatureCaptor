@@ -1,8 +1,8 @@
 ﻿using Application.Boundaries.GetSensorState;
 using Domain.Entity;
-using Moq;
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
+using WebApi.UseCases.GetSensorState;
 using Xunit;
 namespace UnitTest.Application.UseCases.GetSensorState
 {
@@ -15,29 +15,20 @@ namespace UnitTest.Application.UseCases.GetSensorState
         public async Task Should_return_right_sensor_state_for_given_temperature(double temperature, string state)
         {
             //arrange
-            var mocks = new List<Mock>();
             var input = new GetSensorStateInput(temperature);
             var expectedTemperatureToSave = new Temperature(temperature, state);
-            var expectedSensorState = new GetSensorStateOutput(state);
             var useCase = GetSensorStateUseCaseBuilder
                 .Instance
                 .WithAddTemperature(expectedTemperatureToSave)
-                .WithPresenter(expectedSensorState)
-                .Build(mocks);
+                .WithPresenter(out GetSensorStatePresenter presenter)
+                .Build();
 
             //act
             await useCase.ExecuteAsync(input);
+            var result = (presenter.ViewModel as OkObjectResult).Value.ToString();
 
             //assert
-            VerifyAll(mocks);
-        }
-
-        private static void VerifyAll(List<Mock> mocks)
-        {
-            foreach (var mock in mocks)
-            {
-                mock.Verify();
-            }
+            Assert.Equal(state, result);
         }
     }
 }

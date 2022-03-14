@@ -6,7 +6,7 @@
 
     public interface ITemperatureRepository
     {
-        Task<List<Temperature>> GetTemperaturesAsync(int pageSize = 15);
+        Task<List<Temperature>> GetLastTemperaturesAsync(int pageSize);
         Task AddTemperatureAsync(Temperature temperature);
     }
 }

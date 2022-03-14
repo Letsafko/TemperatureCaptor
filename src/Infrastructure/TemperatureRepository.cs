@@ -1,21 +1,41 @@
 ﻿using Domain.Entity;
 using Domain.Repository;
+using Infrastructure.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Infrastructure
 {
     public sealed class TemperatureRepository : ITemperatureRepository
     {
-        public Task AddTemperatureAsync(Temperature temperature)
+        private readonly SqlLiteContext _context;
+        public TemperatureRepository(SqlLiteContext context)
         {
-            throw new NotImplementedException();
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public Task<List<Temperature>> GetTemperaturesAsync(int pageSize = 15)
+        public async Task AddTemperatureAsync(Temperature temperature)
         {
-            throw new NotImplementedException();
+            var tempDao = new TemperatureDao { State = temperature.State, Value = temperature.Value };
+            await _context.Temperatures.AddAsync(tempDao);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Temperature>> GetLastTemperaturesAsync(int pageSize)
+        {
+            return _context
+                .Temperatures
+                .OrderByDescending(x => x.Id)
+                .Take(pageSize)
+                .Select(ConvertFrom)
+                .ToList();
+        }
+
+        private static Temperature ConvertFrom(TemperatureDao temperature)
+        {
+            return new Temperature(temperature.Value, temperature.State);
         }
     }
 }

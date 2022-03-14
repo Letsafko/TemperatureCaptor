@@ -20,7 +20,7 @@
 
         public async Task ExecuteAsync(GetTemperaturesRequestedInput input)
         {
-            var temperatures = await _temperatureRepository.GetTemperaturesAsync(input.PageSize);
+            var temperatures = await _temperatureRepository.GetLastTemperaturesAsync(input.PageSize);
             var temperaturesConverted = Convert(temperatures);
 
             _outputPort.Standard(temperaturesConverted.ToList());

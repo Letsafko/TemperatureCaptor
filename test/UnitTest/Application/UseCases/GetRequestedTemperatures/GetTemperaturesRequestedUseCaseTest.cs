@@ -2,9 +2,12 @@
 {
     using global::Application.Boundaries.GetTemperaturesRequested;
     using global::Domain.Entity;
-    using Moq;
+    using Microsoft.AspNetCore.Mvc;
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using WebApi.UseCases.GetTemperaturesRequested;
+    using WebApi.ViewModels;
     using Xunit;
 
     public sealed class GetTemperaturesRequestedUseCaseTest
@@ -13,31 +16,40 @@
         public async Task Should_return_last_requested_temperatures_for_given_pagesize()
         {
             //arrange
-            var mocks = new List<Mock>();
-            const string Cold = "COLD";
-            const int temperature = 18;
-            var expectedTemperatures = new List<Temperature> { new Temperature(temperature, Cold) };
-            var expectedTemperaturesOutput = new List<GetTemperaturesRequestedOutput> { new GetTemperaturesRequestedOutput(Cold, $"{temperature} °c") };
+            var temperatures = GetRandomTemperatures();
             var input = new GetTemperaturesRequestedInput(15);
             var useCase = GetTemperaturesRequestedUseCaseBuilder
                 .Instance
-                .WithGetTemperatures(input.PageSize, expectedTemperatures)
-                .WithPresenter(expectedTemperaturesOutput)
-                .Build(mocks);
+                .WithGetTemperatures(temperatures)
+                .WithPresenter(out GetTemperaturesRequestedPresenter presenter)
+                .Build();
 
             //act
             await useCase.ExecuteAsync(input);
+            var result = (presenter.ViewModel as OkObjectResult).Value as GetTemperaturesRequestedCollectionViewModel;
 
-            //act
-            VerifyAll(mocks);
+            //assert
+            Assert.NotNull(result);
+            Assert.Equal(result.Count, input.PageSize);
+            Assert.True(result.Count > 0);
         }
 
-        private static void VerifyAll(List<Mock> mocks)
+        private static IEnumerable<Temperature> GetRandomTemperatures()
         {
-            foreach (var mock in mocks)
+            var random = new Random();
+            for (int i = 0; i < 20; i++)
             {
-                mock.Verify();
+                var temperature = random.Next(15, 100);
+                var state = GetState(temperature);
+                yield return new Temperature(temperature, state);
             }
+        }
+
+        private static string GetState(double temperature)
+        {
+            return temperature > 40
+                ? "HOT"
+                : temperature > 22 && temperature <= 40 ? "WARM" : "COLD";
         }
     }
 }

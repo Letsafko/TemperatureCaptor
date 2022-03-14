@@ -1,25 +1,22 @@
-﻿using Application.Boundaries.GetSensorState;
-using Application.UseCases;
+﻿using Application.UseCases;
 using Domain.Entity;
 using Domain.Repository;
 using Domain.Services;
 using Domain.Strategy;
-using Moq;
-using Shouldly;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Infrastructure;
 using UnitTest.Domain;
+using WebApi.UseCases.GetSensorState;
 
 namespace UnitTest.Application.UseCases.GetSensorState
 {
 
     internal sealed class GetSensorStateUseCaseBuilder
     {
-        private readonly IList<Mock> _mocks;
         private readonly IStateSensorStrategyContext _stateSensorStrategyContext;
-        private readonly Mock<ITemperatureRepository> _temperatureRepository;
         private readonly ITemperatureConverter _temperatureConverter;
-        private readonly Mock<IOutputPort> _outputPort;
+        private ITemperatureRepository _temperatureRepository;
+        private readonly GetSensorStatePresenter _presenter;
+        private readonly SqlLiteContext _sqliteContext;
 
         private GetSensorStateUseCaseBuilder()
         {
@@ -30,63 +27,33 @@ namespace UnitTest.Application.UseCases.GetSensorState
                 .WithStrategy(new HotSensorStrategy(TemperatureConfigurationExtensions.GetHotTemperature()))
                 .Build();
 
-            _temperatureRepository = new Mock<ITemperatureRepository>(MockBehavior.Strict);
+            _sqliteContext = SqlLiteContextExtensions.GetInMemoryContext();
+            _temperatureRepository = new TemperatureRepository(_sqliteContext);
             _temperatureConverter = new TemperatureConverter();
-            _outputPort = new Mock<IOutputPort>();
-            _mocks = new List<Mock>();
+            _presenter = new GetSensorStatePresenter();
         }
 
         internal static GetSensorStateUseCaseBuilder Instance =>
             new GetSensorStateUseCaseBuilder();
 
-        internal GetSensorStateUseCase Build(List<Mock> mocks = null)
+        internal GetSensorStateUseCase Build()
         {
-            mocks?.AddRange(_mocks);
             return new GetSensorStateUseCase(_stateSensorStrategyContext,
-                _temperatureRepository.Object,
+                _temperatureRepository,
                 _temperatureConverter,
-                _outputPort.Object);
+                _presenter);
         }
 
-        internal GetSensorStateUseCaseBuilder WithPresenter(GetSensorStateOutput outpout)
+        internal GetSensorStateUseCaseBuilder WithPresenter(out GetSensorStatePresenter presenter)
         {
-            _mocks.Add(_outputPort);
-            var returns = _outputPort.Setup(x => x.Standard(It.Is<GetSensorStateOutput>(y => CompareSensorStateOutpout(y, outpout))));
-
-#pragma warning disable CS0618
-            returns
-                .AtMostOnce()
-                .Verifiable();
-#pragma warning restore CS0618
-
+            presenter = _presenter;
             return this;
         }
 
         internal GetSensorStateUseCaseBuilder WithAddTemperature(Temperature temperature)
         {
-            _mocks.Add(_temperatureRepository);
-            var returns = _temperatureRepository.Setup(x => x.AddTemperatureAsync(It.Is<Temperature>(y => CompareTemperature(y, temperature))))
-                .Returns(Task.CompletedTask);
-
-#pragma warning disable CS0618
-            returns
-                .AtMostOnce()
-                .Verifiable();
-#pragma warning restore CS0618
-
+            _temperatureRepository.AddTemperatureAsync(temperature).Wait();
             return this;
-        }
-
-        private static bool CompareTemperature(Temperature expected, Temperature actual)
-        {
-            expected.ShouldBeEquivalentTo(actual);
-            return true;
-        }
-
-        private static bool CompareSensorStateOutpout(GetSensorStateOutput expected, GetSensorStateOutput actual)
-        {
-            expected.ShouldBeEquivalentTo(actual);
-            return true;
         }
     }
 }

@@ -1,74 +1,74 @@
 ﻿namespace UnitTest.Application.UseCases.GetRequestedTemperatures
 {
-    using global::Application.Boundaries.GetTemperaturesRequested;
     using global::Application.UseCases;
     using global::Domain.Entity;
     using global::Domain.Repository;
-    using Moq;
-    using Shouldly;
+    using Infrastructure;
+    using Infrastructure.Models;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
+    using WebApi.UseCases.GetTemperaturesRequested;
 
     internal sealed class GetTemperaturesRequestedUseCaseBuilder
     {
-        private readonly List<Mock> _mocks;
-        private readonly Mock<ITemperatureRepository> _temperatureRepository;
-        private readonly Mock<IOutputPort> _outputPort;
+        private readonly GetTemperaturesRequestedPresenter _presenter;
+        private ITemperatureRepository _temperatureRepository;
+        private readonly SqlLiteContext _sqliteContext;
 
         private GetTemperaturesRequestedUseCaseBuilder()
         {
-            _temperatureRepository = new Mock<ITemperatureRepository>(MockBehavior.Strict);
-            _outputPort = new Mock<IOutputPort>(MockBehavior.Strict);
-            _mocks = new List<Mock>();
+            _sqliteContext = SqlLiteContextExtensions.GetInMemoryContext();
+            _temperatureRepository = new TemperatureRepository(_sqliteContext);
+            _presenter = new GetTemperaturesRequestedPresenter();
         }
 
         internal static GetTemperaturesRequestedUseCaseBuilder Instance
             => new GetTemperaturesRequestedUseCaseBuilder();
 
-        internal GetTemperaturesRequestedUseCase Build(List<Mock> mocks = null)
+        internal GetTemperaturesRequestedUseCase Build()
         {
-            mocks?.AddRange(_mocks);
-            return new GetTemperaturesRequestedUseCase(_temperatureRepository.Object,
-                _outputPort.Object);
+            return new GetTemperaturesRequestedUseCase(_temperatureRepository,
+                _presenter);
         }
 
-        internal GetTemperaturesRequestedUseCaseBuilder WithGetTemperatures(int pageSize, List<Temperature> temperatures)
+        internal GetTemperaturesRequestedUseCaseBuilder WithGetTemperatures(IEnumerable<Temperature> temperatures)
         {
-            _mocks.Add(_temperatureRepository);
-            var returns = _temperatureRepository.Setup(x => x.GetTemperaturesAsync(pageSize))
-                .ReturnsAsync(temperatures);
-
-#pragma warning disable CS0618
-            returns
-                .AtMostOnce()
-                .Verifiable();
-#pragma warning restore CS0618
-
+            AddTemperaturesAsync(_sqliteContext, temperatures).Wait();
             return this;
         }
 
-        internal GetTemperaturesRequestedUseCaseBuilder WithPresenter(List<GetTemperaturesRequestedOutput> temperatureOutput)
+        internal GetTemperaturesRequestedUseCaseBuilder WithPresenter(out GetTemperaturesRequestedPresenter presenter)
         {
-            _mocks.Add(_outputPort);
-            var returns = _outputPort
-                .Setup(x => x.Standard(It.Is<List<GetTemperaturesRequestedOutput>>(y => CompareRequestedTemperaturesOutpout(y, temperatureOutput))));
-
-#pragma warning disable CS0618
-            returns
-                .AtMostOnce()
-                .Verifiable();
-#pragma warning restore CS0618
-
+            presenter = _presenter;
             return this;
         }
 
-        private static bool CompareRequestedTemperaturesOutpout(List<GetTemperaturesRequestedOutput> expected,
-            List<GetTemperaturesRequestedOutput> actual)
+        private static Task AddTemperaturesAsync(SqlLiteContext sqliteContext,
+            IEnumerable<Temperature> temperatures)
         {
-            for (var i = 0; i < expected.Count; i++)
+            var temperatturesDao = Convert(temperatures);
+            sqliteContext
+                .Temperatures
+                .AddRangeAsync(temperatturesDao);
+
+            return sqliteContext.SaveChangesAsync();
+        }
+
+        private static IEnumerable<TemperatureDao> Convert(IEnumerable<Temperature> temperatures)
+        {
+            foreach (var temp in temperatures)
             {
-                expected[i].ShouldBeEquivalentTo(actual[i]);
+                yield return new TemperatureDao
+                {
+                    State = temp.State,
+                    Value = temp.Value
+                };
             }
-            return true;
         }
+    }
+
+    internal sealed class a
+    {
+
     }
 }
