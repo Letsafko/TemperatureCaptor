@@ -2,6 +2,7 @@
 {
     using Application.Boundaries.GetSensorState;
     using FluentMediator;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using System.ComponentModel.DataAnnotations;
     using System.Threading.Tasks;
@@ -21,6 +22,8 @@
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("state")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
         public async Task<IActionResult> GetSensorStateAsync([FromServices] IMediator mediator,
             [FromServices] GetSensorStatePresenter presenter,
             [FromBody][Required] GetSensorStateRequest request)

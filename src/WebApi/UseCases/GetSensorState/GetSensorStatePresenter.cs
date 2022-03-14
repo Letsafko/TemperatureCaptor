@@ -21,5 +21,14 @@
         {
             ViewModel = new OkObjectResult(output.State);
         }
+
+        /// <summary>
+        /// error output
+        /// </summary>
+        /// <param name="message"></param>
+        public void WriteError(string message)
+        {
+            ViewModel = new BadRequestObjectResult(message);
+        }
     }
 }

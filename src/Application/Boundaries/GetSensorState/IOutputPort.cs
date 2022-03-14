@@ -1,6 +1,7 @@
 ﻿namespace Application.Boundaries.GetSensorState
 {
-    public interface IOutputPort : IOutputPortStandard<GetSensorStateOutput>
+    public interface IOutputPort : IOutputPortStandard<GetSensorStateOutput>,
+        IOutputPortError
     {
     }
 }

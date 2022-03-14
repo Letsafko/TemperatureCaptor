@@ -24,9 +24,17 @@
             _outputPort = outputPort;
         }
 
+        private const double ZeroAbsolu = -273.15;
+        private const double MaxTempCelsius = 100;
         public async Task ExecuteAsync(GetSensorStateInput input)
         {
             var temperatureInCelsius = _temperatureConverter.ToCelsius(input.Temperature);
+            if (temperatureInCelsius < ZeroAbsolu || temperatureInCelsius > MaxTempCelsius)
+            {
+                _outputPort.WriteError("not valid celsius temperature.");
+                return;
+            }
+
             var sensorState = _stateSensorStrategyContext
                 .GetStrategy(temperatureInCelsius)
                 .GetSensorState();

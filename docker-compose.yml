@@ -7,5 +7,6 @@ services:
       dockerfile: src/WebApi/Dockerfile
     ports:
         - 5500:80
+        - 5501:443
     environment:
         - ASPNETCORE_ENVIRONMENT=Development
