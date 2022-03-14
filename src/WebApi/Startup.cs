@@ -1,34 +1,58 @@
+using Application;
+using Domain;
+using Domain.Strategy;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using WebApi.Modules;
 
 namespace WebApi
 {
+    /// <summary>
+    /// Startup
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        ///  Creates an instance of <see cref="Startup"/>
+        /// </summary>
+        /// <param name="configuration"></param>
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            _configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration _configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// Configure service collection.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<WarmTemperatureRangeSettings>(_configuration.GetSection("Sensor:State:Warm"));
+            services.Configure<ColdTemperatureSettings>(_configuration.GetSection("Sensor:State:Cold"));
+            services.Configure<HotTemperatureSettings>(_configuration.GetSection("Sensor:State:Hot"));
+
+            services
+                .AddInfrastructureServices()
+                .AddApplicationServices()
+                .AddDomainServices()
+                .AddPresenters()
+                .AddMediator()
+                .AddSwagger();
+
             services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// <summary>
+        /// Configgure application.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -39,6 +63,8 @@ namespace WebApi
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCustomSwagger();
 
             app.UseAuthorization();
 
