@@ -6,19 +6,18 @@
     using Infrastructure;
     using Infrastructure.Models;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using WebApi.UseCases.GetTemperaturesRequested;
 
     internal sealed class GetTemperaturesRequestedUseCaseBuilder
     {
         private readonly GetTemperaturesRequestedPresenter _presenter;
-        private ITemperatureRepository _temperatureRepository;
-        private readonly SqlLiteContext _sqliteContext;
+        private readonly ISensorRepository _temperatureRepository;
+        private readonly SqliteContext _sqliteContext;
 
         private GetTemperaturesRequestedUseCaseBuilder()
         {
             _sqliteContext = SqlLiteContextExtensions.GetInMemoryContext();
-            _temperatureRepository = new TemperatureRepository(_sqliteContext);
+            _temperatureRepository = new SensorRepository(_sqliteContext);
             _presenter = new GetTemperaturesRequestedPresenter();
         }
 
@@ -31,9 +30,9 @@
                 _presenter);
         }
 
-        internal GetTemperaturesRequestedUseCaseBuilder WithGetTemperatures(IEnumerable<Temperature> temperatures)
+        internal GetTemperaturesRequestedUseCaseBuilder WithGetTemperatures(IEnumerable<Sensor> temperatures)
         {
-            AddTemperaturesAsync(_sqliteContext, temperatures).Wait();
+            AddTemperatures(_sqliteContext, temperatures);
             return this;
         }
 
@@ -43,32 +42,27 @@
             return this;
         }
 
-        private static Task AddTemperaturesAsync(SqlLiteContext sqliteContext,
-            IEnumerable<Temperature> temperatures)
+        private static void AddTemperatures(SqliteContext sqliteContext,
+            IEnumerable<Sensor> temperatures)
         {
             var temperatturesDao = Convert(temperatures);
             sqliteContext
-                .Temperatures
-                .AddRangeAsync(temperatturesDao);
+                .Sensors
+                .AddRange(temperatturesDao);
 
-            return sqliteContext.SaveChangesAsync();
+            sqliteContext.SaveChanges();
         }
 
-        private static IEnumerable<TemperatureDao> Convert(IEnumerable<Temperature> temperatures)
+        private static IEnumerable<SensorDao> Convert(IEnumerable<Sensor> temperatures)
         {
             foreach (var temp in temperatures)
             {
-                yield return new TemperatureDao
+                yield return new SensorDao
                 {
                     State = temp.State,
-                    Value = temp.Value
+                    Temperature = temp.Temperature
                 };
             }
         }
-    }
-
-    internal sealed class a
-    {
-
     }
 }

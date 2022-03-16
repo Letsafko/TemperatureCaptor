@@ -21,7 +21,7 @@
         /// <param name="output"></param>
         public void Standard(List<GetTemperaturesRequestedOutput> output)
         {
-            ViewModel = new OkObjectResult(new GetTemperaturesRequestedCollectionViewModel(output));
+            ViewModel = new OkObjectResult(new TemperatureCollectionViewModel(output));
         }
     }
 }

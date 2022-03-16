@@ -1,10 +1,10 @@
 using Application;
+using Application.Services;
 using Domain;
 using Domain.Strategy;
 using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,6 +37,7 @@ namespace WebApi
             services.Configure<WarmTemperatureRangeSettings>(_configuration.GetSection("Sensor:State:Warm"));
             services.Configure<ColdTemperatureSettings>(_configuration.GetSection("Sensor:State:Cold"));
             services.Configure<HotTemperatureSettings>(_configuration.GetSection("Sensor:State:Hot"));
+            services.Configure<TemperatureCaptorSettings>(_configuration.GetSection("Sensor:Captor"));
 
             services
                 .AddInfrastructureServices()
@@ -76,8 +77,8 @@ namespace WebApi
 
             using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<SqlLiteContext>();
-                context.Database.Migrate();
+                var context = serviceScope.ServiceProvider.GetRequiredService<SqliteContext>();
+                context.Database.EnsureCreated();
             }
         }
     }

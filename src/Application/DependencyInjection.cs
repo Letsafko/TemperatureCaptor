@@ -1,5 +1,6 @@
 ﻿namespace Application
 {
+    using Application.Services;
     using Application.UseCases;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@
 
             services.AddScoped<Boundaries.GetTemperaturesRequested.IUseCase, GetTemperaturesRequestedUseCase>();
             services.AddScoped<Boundaries.GetSensorState.IUseCase, GetSensorStateUseCase>();
+            services.AddSingleton<ITemperatureCaptor, TemperatureCaptor>();
 
             return services;
         }

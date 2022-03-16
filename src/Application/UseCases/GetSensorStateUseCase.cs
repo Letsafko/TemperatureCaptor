@@ -9,24 +9,23 @@
     public sealed class GetSensorStateUseCase : IUseCase
     {
         private readonly IStateSensorStrategyContext _stateSensorStrategyContext;
-        private readonly ITemperatureRepository _temperatureRepository;
+        private readonly ISensorRepository _sensorRepository;
         private readonly IOutputPort _outputPort;
         public GetSensorStateUseCase(IStateSensorStrategyContext stateSensorStrategyContext,
-            ITemperatureRepository temperatureRepository,
+            ISensorRepository sensorRepository,
             IOutputPort outputPort)
         {
             _stateSensorStrategyContext = stateSensorStrategyContext;
-            _temperatureRepository = temperatureRepository;
+            _sensorRepository = sensorRepository;
             _outputPort = outputPort;
         }
 
         private const double ZeroAbsolu = -273.15;
-        private const double MaxTempCelsius = 100;
         public async Task ExecuteAsync(GetSensorStateInput input)
         {
-            if (input.Temperature < ZeroAbsolu || input.Temperature > MaxTempCelsius)
+            if (input.Temperature < ZeroAbsolu)
             {
-                _outputPort.WriteError("not valid celsius temperature.");
+                _outputPort.WriteError($"{input.Temperature} not valid celsius temperature.");
                 return;
             }
 
@@ -34,10 +33,10 @@
                 .GetStrategy(input.Temperature)
                 .GetSensorState();
 
-            var temperatureToSave = new Temperature(input.Temperature, sensorState);
-            await _temperatureRepository.AddTemperatureAsync(temperatureToSave);
+            var temperatureToSave = new Sensor(input.Temperature, sensorState);
+            await _sensorRepository.AddNewSensorAsync(temperatureToSave);
 
-            _outputPort.Standard(new GetSensorStateOutput(sensorState));
+            _outputPort.Standard(new GetSensorStateOutput(input.Temperature, sensorState));
         }
     }
 }

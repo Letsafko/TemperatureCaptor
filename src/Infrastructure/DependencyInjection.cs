@@ -6,11 +6,11 @@
 
     public static class DependencyInjection
     {
-        private const string Datasource = "temperatures.db";
+        private const string Datasource = "database.db";
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services)
         {
-            services.AddTransient<ITemperatureRepository, TemperatureRepository>();
-            services.AddDbContext<SqlLiteContext>(optionsBuilder =>
+            services.AddTransient<ISensorRepository, SensorRepository>();
+            services.AddDbContext<SqliteContext>(optionsBuilder =>
             {
                 optionsBuilder
                 .UseSqlite($"Data Source={Datasource}")

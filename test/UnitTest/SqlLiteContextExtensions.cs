@@ -5,13 +5,13 @@
 
     internal static class SqlLiteContextExtensions
     {
-        internal static SqlLiteContext GetInMemoryContext()
+        internal static SqliteContext GetInMemoryContext()
         {
-            var options = new DbContextOptionsBuilder<SqlLiteContext>()
+            var options = new DbContextOptionsBuilder<SqliteContext>()
                 .UseInMemoryDatabase(databaseName: "inMemorydb")
                 .Options;
 
-            return new SqlLiteContext(options);
+            return new SqliteContext(options);
         }
     }
 }

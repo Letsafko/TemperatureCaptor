@@ -2,6 +2,7 @@
 {
     using Application.Boundaries.GetSensorState;
     using Microsoft.AspNetCore.Mvc;
+    using WebApi.ViewModels;
 
     /// <summary>
     ///  Get sensor state presenter.
@@ -19,7 +20,8 @@
         /// <param name="output"></param>
         public void Standard(GetSensorStateOutput output)
         {
-            ViewModel = new OkObjectResult(output.State);
+            ViewModel = new OkObjectResult(new TemperatureViewModel(output.State,
+                output.Temperature));
         }
 
         /// <summary>

@@ -3,18 +3,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure
 {
-    public sealed class SqlLiteContext : DbContext
+    public sealed class SqliteContext : DbContext
     {
-        public SqlLiteContext(DbContextOptions options)
+        public SqliteContext(DbContextOptions options)
             : base(options)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<TemperatureDao>().ToTable("temperature");
+            modelBuilder.Entity<SensorDao>().ToTable("sensor");
         }
 
-        public DbSet<TemperatureDao> Temperatures { get; set; }
+        public DbSet<SensorDao> Sensors { get; set; }
     }
 }

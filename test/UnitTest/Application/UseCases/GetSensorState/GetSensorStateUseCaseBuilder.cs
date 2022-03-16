@@ -12,9 +12,9 @@ namespace UnitTest.Application.UseCases.GetSensorState
     internal sealed class GetSensorStateUseCaseBuilder
     {
         private readonly IStateSensorStrategyContext _stateSensorStrategyContext;
-        private ITemperatureRepository _temperatureRepository;
+        private readonly ISensorRepository _temperatureRepository;
         private readonly GetSensorStatePresenter _presenter;
-        private readonly SqlLiteContext _sqliteContext;
+        private readonly SqliteContext _sqliteContext;
 
         private GetSensorStateUseCaseBuilder()
         {
@@ -26,7 +26,7 @@ namespace UnitTest.Application.UseCases.GetSensorState
                 .Build();
 
             _sqliteContext = SqlLiteContextExtensions.GetInMemoryContext();
-            _temperatureRepository = new TemperatureRepository(_sqliteContext);
+            _temperatureRepository = new SensorRepository(_sqliteContext);
             _presenter = new GetSensorStatePresenter();
         }
 
@@ -46,9 +46,9 @@ namespace UnitTest.Application.UseCases.GetSensorState
             return this;
         }
 
-        internal GetSensorStateUseCaseBuilder WithAddTemperature(Temperature temperature)
+        internal GetSensorStateUseCaseBuilder WithAddTemperature(Sensor temperature)
         {
-            _temperatureRepository.AddTemperatureAsync(temperature).Wait();
+            _temperatureRepository.AddNewSensorAsync(temperature);
             return this;
         }
     }

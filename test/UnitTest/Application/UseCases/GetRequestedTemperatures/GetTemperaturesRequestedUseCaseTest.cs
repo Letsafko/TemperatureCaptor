@@ -26,7 +26,7 @@
 
             //act
             await useCase.ExecuteAsync(input);
-            var result = (presenter.ViewModel as OkObjectResult).Value as GetTemperaturesRequestedCollectionViewModel;
+            var result = (presenter.ViewModel as OkObjectResult).Value as TemperatureCollectionViewModel;
 
             //assert
             Assert.NotNull(result);
@@ -34,14 +34,14 @@
             Assert.True(result.Count > 0);
         }
 
-        private static IEnumerable<Temperature> GetRandomTemperatures()
+        private static IEnumerable<Sensor> GetRandomTemperatures()
         {
             var random = new Random();
             for (int i = 0; i < 20; i++)
             {
                 var temperature = random.Next(15, 100);
                 var state = GetState(temperature);
-                yield return new Temperature(temperature, state);
+                yield return new Sensor(temperature, state);
             }
         }
 

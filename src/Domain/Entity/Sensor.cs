@@ -3,15 +3,15 @@
 namespace Domain.Entity
 {
     [ExcludeFromCodeCoverage]
-    public sealed class Temperature
+    public sealed class Sensor
     {
-        public Temperature(double value, string state)
+        public Sensor(double temperature, string state)
         {
-            Value = value;
+            Temperature = temperature;
             State = state;
         }
 
-        public double Value { get; }
+        public double Temperature { get; }
         public string State { get; }
     }
 }

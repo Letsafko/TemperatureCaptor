@@ -9,9 +9,9 @@
 
     public sealed class GetTemperaturesRequestedUseCase : IUseCase
     {
-        private readonly ITemperatureRepository _temperatureRepository;
+        private readonly ISensorRepository _temperatureRepository;
         private readonly IOutputPort _outputPort;
-        public GetTemperaturesRequestedUseCase(ITemperatureRepository temperatureRepository,
+        public GetTemperaturesRequestedUseCase(ISensorRepository temperatureRepository,
             IOutputPort outputPort)
         {
             _temperatureRepository = temperatureRepository;
@@ -20,18 +20,18 @@
 
         public async Task ExecuteAsync(GetTemperaturesRequestedInput input)
         {
-            var temperatures = await _temperatureRepository.GetLastTemperaturesAsync(input.PageSize);
+            var temperatures = await _temperatureRepository.GetLastMeasuresAsync(input.PageSize);
             var temperaturesConverted = Convert(temperatures);
 
             _outputPort.Standard(temperaturesConverted.ToList());
         }
 
-        private static IEnumerable<GetTemperaturesRequestedOutput> Convert(IEnumerable<Temperature> temperatures)
+        private static IEnumerable<GetTemperaturesRequestedOutput> Convert(IEnumerable<Sensor> temperatures)
         {
             foreach (var temperature in temperatures)
             {
                 yield return new GetTemperaturesRequestedOutput(temperature.State,
-                    $"{temperature.Value} °c");
+                    temperature.Temperature);
             }
         }
     }
